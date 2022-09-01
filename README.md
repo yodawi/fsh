@@ -7,3 +7,10 @@ My own shell. The fox shell
 • To start the shell run `$ ./main` (after compiling)
 
 • To exit press `ctrl-d`
+
+# todo
+• Autocompletion
+
+• Syntax hylighting
+
+• .fshrc and all customizations
