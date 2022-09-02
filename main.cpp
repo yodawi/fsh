@@ -7,6 +7,7 @@
 #include <vector>
 #include <sys/wait.h>
 #include <signal.h>
+#include <pwd.h>
 
 namespace fs = std::filesystem;
 using namespace std;
@@ -16,9 +17,9 @@ typedef int (*FnPtr)(int, int);
 vector<string> command;
 
 const int pathsSize = 3;
-const string homeDir = "/home/fox";
 string paths[pathsSize] = {"./", "/bin/", "/usr/bin/"};
-string currentPath = homeDir;
+string currentPath;
+string homeDir;
 
 void readCommands() {
   string inp;
@@ -97,6 +98,11 @@ int main(void) {
   currentPath = fs::current_path();
 
   signal(SIGINT, &signitHandler);
+
+  struct passwd *pw = getpwuid(getuid());
+  homeDir = pw->pw_dir;
+  currentPath = homeDir;
+
 
   int ok=1;
   while(1) {
