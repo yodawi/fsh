@@ -9,8 +9,6 @@ My own shell. The fox shell
 • To exit press `ctrl-d`
 
 # todo
-• Home directory ~ URGENT!!
-
 • Autocompletion
 
 • Syntax hylighting

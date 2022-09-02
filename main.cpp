@@ -1,4 +1,6 @@
 #include <iostream>
+#include <chrono>
+#include <ctime>
 #include <functional>
 #include <map>
 #include <filesystem>
@@ -19,6 +21,7 @@ vector<string> command;
 const int pathsSize = 3;
 string paths[pathsSize] = {"./", "/bin/", "/usr/bin/"};
 string currentPath;
+string v_currentPath = "~";
 string homeDir;
 
 void readCommands() {
@@ -60,6 +63,7 @@ int cd() {
   if(command.size()<2) {
     path.append(homeDir);
   }
+
   else {
     path.append(currentPath);
     path.append("/");
@@ -69,6 +73,14 @@ int cd() {
   int s = chdir(path.c_str());
 
   currentPath = fs::current_path();
+  if(currentPath.substr(0, homeDir.size()) == homeDir){
+    v_currentPath = "";
+    v_currentPath.append("~");
+    v_currentPath.append(currentPath.substr(homeDir.size(), currentPath.size()-homeDir.size()));
+
+  }
+  else
+    v_currentPath = currentPath;
 
   if(s<0)
     return 0;
@@ -94,20 +106,41 @@ void signitHandler(int s) {
   jump = 1;
 }
 
+const string currentTime() {
+  time_t     now = time(0);
+  struct tm  tstruct;
+  char       buf[80];
+  tstruct = *localtime(&now);
+
+  strftime(buf, sizeof(buf), "%X", &tstruct);
+
+  return buf;
+}
+
 int main(void) {
   currentPath = fs::current_path();
 
   signal(SIGINT, &signitHandler);
 
   struct passwd *pw = getpwuid(getuid());
+
   homeDir = pw->pw_dir;
+  string userName = pw->pw_name;
+
+  char hostName[253];
+  gethostname(hostName, 253);
+
   currentPath = homeDir;
 
 
   int ok=1;
   while(1) {
     command.clear();
-    cout<<currentPath<<" SNOWDEN"<<endl<<"$ ";
+    cout<<"\033[1;32m"<<v_currentPath<<"\033[0m ";
+    cout<<"\033[1;34m"<<currentTime()<<"\033[0m ";
+    cout<<"\033[1;33m"<<userName<<"@"<<hostName<<"\033[0m"<<endl;
+    cout<<"$ ";
+
     readCommands();
     string buf;
 
