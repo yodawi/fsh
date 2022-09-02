@@ -1,4 +1,5 @@
 #include <iostream>
+#include <stack>
 #include <chrono>
 #include <ctime>
 #include <functional>
@@ -17,6 +18,7 @@ using namespace std;
 typedef int (*FnPtr)(int, int);
 
 vector<string> command;
+vector<vector<string> > history;
 
 const int pathsSize = 3;
 string paths[pathsSize] = {"./", "/bin/", "/usr/bin/"};
@@ -40,6 +42,7 @@ void readCommands() {
       pi = i+1;
     }
   }
+
   command.push_back(inp.substr(pi, inp.size()-pi));
 }
 
@@ -54,8 +57,10 @@ void execute() {
 
   if(!fork()) {
     execv(command[0].c_str(), const_cast<char* const *>(argv.data()));
-  }
+  } 
+
   wait(NULL);
+
 }
 
 int cd() {
@@ -143,6 +148,10 @@ int main(void) {
 
     readCommands();
     string buf;
+
+    if(history.size()==0 || history[history.size()-1] != command) {
+      history.push_back(command);
+    }
 
     if(checkShell())
       goto done;

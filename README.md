@@ -9,6 +9,8 @@ My own shell. The fox shell
 • To exit press `ctrl-d`
 
 # todo
+• Read history back when key-up
+
 • Autocompletion
 
 • Syntax hylighting
