@@ -26,24 +26,87 @@ string currentPath;
 string v_currentPath = "~";
 string homeDir;
 
-void readCommands() {
+int readCommands() {
   string inp;
-  getline(cin, inp);
 
-  if(cin.eof()) {
-    cout<<endl;
-    exit(0);
-  }
+  char c=100, pc=100;
+  int xPos=0;
+  system ("/bin/stty raw -echo");
+  string line = "";
+  string aec = "";
+  while(1) {
+    c = getchar();
 
-  int pi=0;
-  for(int i=0; i<inp.size(); i++) {
-    if(inp[i]==' ') {
-      command.push_back(inp.substr(pi, i-pi));
-      pi = i+1;
+    // cout<<" = "<<(int)c<<" "<<(getchar())<<" "<<(getchar())<<" "<<endl;
+    if(c==4) {
+      system ("/bin/stty cooked");
+      exit(0);
     }
-  }
 
-  command.push_back(inp.substr(pi, inp.size()-pi));
+    else if(c==3)
+      return(0);
+
+    else if(c==13) {
+      break;
+      puts("breaking...");
+    }
+
+    else if(c==27 && getchar()==79) {
+      int cc = getchar();
+
+      if(cc==65) {
+        puts("up");
+      }
+      else if(cc==66) {
+        puts("down");
+      }
+      else if(cc==67 && line.size()-xPos>0) {
+        xPos++;
+      }
+      else if(cc=68 && xPos>0) {
+        xPos--;
+      }
+    }
+
+
+    else if(c==127 && line.size()>=1) {
+      xPos--;
+      line.erase(line.begin()+xPos, line.begin()+xPos+1);
+    }
+
+    else {
+      line.insert(xPos, string(1, c));
+      xPos++;
+    }
+
+    cout<<"\33[2K\r";
+    cout<<"$ "<<line;
+
+    cout<<"\33[1000000;"<<xPos+3<<"H"; // TODO FIX THIS SHIT
+    aec="";
+
+    pc = c;
+  }
+  system ("/bin/stty cooked");
+
+  //  getline(cin, inp);
+  //
+  //  if(cin.eof()) {
+  //    cout<<endl;
+  //    exit(0);
+  //  }
+  //
+  //  int pi=0;
+  //  for(int i=0; i<inp.size(); i++) {
+  //    if(inp[i]==' ') {
+  //      command.push_back(inp.substr(pi, i-pi));
+  //      pi = i+1;
+  //    }
+  //  }
+  //
+  //  command.push_back(inp.substr(pi, inp.size()-pi));
+
+  return(1);
 }
 
 void execute() {
@@ -105,11 +168,6 @@ int checkShell() {
   return 0;
 }
 
-int jump = 0;
-
-void signitHandler(int s) {
-  jump = 1;
-}
 
 const string currentTime() {
   time_t     now = time(0);
@@ -125,7 +183,6 @@ const string currentTime() {
 int main(void) {
   currentPath = fs::current_path();
 
-  signal(SIGINT, &signitHandler);
 
   struct passwd *pw = getpwuid(getuid());
 
@@ -146,8 +203,12 @@ int main(void) {
     cout<<"\033[1;33m"<<userName<<"@"<<hostName<<"\033[0m"<<endl;
     cout<<"$ ";
 
-    readCommands();
     string buf;
+
+    int clr = readCommands();
+    if(!clr)
+      goto done; 
+
 
     if(history.size()==0 || history[history.size()-1] != command) {
       history.push_back(command);

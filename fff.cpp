@@ -1,20 +1,8 @@
-#include <iostream>
-using namespace std;
+#include <stdio.h>
 
-int main()
-{
-  int i;
-  cin>> i;
-
-  if(!cin.eof())
-  {
-    cout<< "\n Format Error \n";
-  }
-  else
-  {
-    cout<< i;
-  }
-
-  getchar();
+int main(void) {   
+  int c;   
+  while ((c=getchar())!= EOF)      
+    putchar(c); 
   return 0;
 }
