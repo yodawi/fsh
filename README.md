@@ -12,7 +12,7 @@ My own implementation of a shell. The fox shell
 
 
 # todo
-• Read history back when key-up
+• Filter history
 
 • Autocompletion
 

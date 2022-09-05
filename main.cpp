@@ -18,7 +18,7 @@ using namespace std;
 typedef int (*FnPtr)(int, int);
 
 vector<string> command;
-vector<vector<string> > history;
+vector<string> history;
 
 const int pathsSize = 3;
 string paths[pathsSize] = {"./", "/bin/", "/usr/bin/"};
@@ -30,21 +30,24 @@ int readCommands() {
   string inp;
 
   char c=100, pc=100;
-  int xPos=0;
+  int xPos=0, hLevel=history.size();
   system ("/bin/stty raw -echo");
   string line = "";
-  string aec = "";
+  history.push_back("");
   while(1) {
     c = getchar();
 
-    // cout<<" = "<<(int)c<<" "<<(getchar())<<" "<<(getchar())<<" "<<endl;
     if(c==4) {
+      cout<<endl;
       system ("/bin/stty cooked");
       exit(0);
     }
 
-    else if(c==3)
+    else if(c==3) {
+      cout<<endl;
+      system ("/bin/stty cooked");
       return(0);
+    }
 
     else if(c==13) {
       break;
@@ -55,19 +58,28 @@ int readCommands() {
       int cc = getchar();
 
       if(cc==65) {
-        puts("up");
+        if(hLevel>0) {
+          hLevel--;
+          line=history[hLevel];
+        }
+        else
+          cout << '\a';
       }
       else if(cc==66) {
-        puts("down");
+        if(hLevel<history.size()-1) {
+          hLevel++;
+          line=history[hLevel];
+        }
+        else
+          cout << '\a';
       }
       else if(cc==67 && line.size()-xPos>0) {
         xPos++;
       }
-      else if(cc=68 && xPos>0) {
+      else if(cc==68 && xPos>0) {
         xPos--;
       }
     }
-
 
     else if(c==127 && line.size()>=1) {
       xPos--;
@@ -79,32 +91,33 @@ int readCommands() {
       xPos++;
     }
 
+    history[history.size()-1] = line;
     cout<<"\33[2K\r";
     cout<<"$ "<<line;
 
     cout<<"\33[1000000;"<<xPos+3<<"H"; // TODO FIX THIS SHIT
-    aec="";
 
     pc = c;
   }
   system ("/bin/stty cooked");
+  cout<<endl;
 
-  //  getline(cin, inp);
-  //
-  //  if(cin.eof()) {
-  //    cout<<endl;
-  //    exit(0);
-  //  }
-  //
-  //  int pi=0;
-  //  for(int i=0; i<inp.size(); i++) {
-  //    if(inp[i]==' ') {
-  //      command.push_back(inp.substr(pi, i-pi));
-  //      pi = i+1;
-  //    }
-  //  }
-  //
-  //  command.push_back(inp.substr(pi, inp.size()-pi));
+  int pi=0;
+  for(int i=0; i<line.size(); i++) {
+    if(line[i]==' ') {
+      command.push_back(line.substr(pi, i-pi));
+      pi = i+1;
+    }
+  }
+
+  command.push_back(line.substr(pi, line.size()-pi));
+
+  if(command[0]=="exit") {
+    exit(0);
+  }
+
+  if(history[history.size()-1]==history[history.size()-2])
+    history.pop_back();
 
   return(1);
 }
@@ -209,10 +222,6 @@ int main(void) {
     if(!clr)
       goto done; 
 
-
-    if(history.size()==0 || history[history.size()-1] != command) {
-      history.push_back(command);
-    }
 
     if(checkShell())
       goto done;
